@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CarValue: 3D Interactive Project Presentation</title>
+  <link rel="stylesheet" href="/static/presentation.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="ppt-body">
+  <div class="ppt-container">
+    <!-- Top Bar Navigation -->
+    <header class="ppt-topbar">
+      <div class="ppt-logo">
+        <span>🚗</span>
+        <span>CarValue Architecture PPT</span>
+        <span class="badge">3D LIVE DEMO</span>
+      </div>
+      <div class="ppt-controls">
+        <a href="/" class="ppt-btn">← Back to App</a>
+        <button type="button" id="prevBtn" class="ppt-btn">Previous (←)</button>
+        <button type="button" id="nextBtn" class="ppt-btn primary">Next (→)</button>
+        <button type="button" id="autoPlayBtn" class="ppt-btn">▶ Auto Play</button>
+        <button type="button" id="fsBtn" class="ppt-btn">⛶ Fullscreen</button>
+      </div>
+    </header>
+
+    <!-- 3D Viewport -->
+    <main class="ppt-viewport">
+      <!-- SLIDE 1: Title & Executive Overview -->
+      <section class="ppt-slide-card active-slide" id="slide-0">
+        <div class="slide-header">
+          <span class="slide-tag">01 / OVERVIEW & OBJECTIVE</span>
+          <h1 class="slide-title">CarValue: Used Car Market Value Prediction System</h1>
+          <p class="slide-subtitle">A high-precision, production-grade machine learning platform delivering transparent used-car valuations and negotiation guidance.</p>
+        </div>
+        <div class="ppt-grid-3">
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🎯</span>
+            <h3>The Core Problem</h3>
+            <p>Used car transactions suffer from extreme information asymmetry. Buyers overpay and sellers underprice due to opaque dealership margins and volatile market rates.</p>
+            <span class="ppt-card-badge">Market Inefficiency</span>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">⚡</span>
+            <h3>Algorithmic Solution</h3>
+            <p>Empirical regression pipeline benchmarked across 6 distinct algorithms with automated feature engineering, robust error banding, and actionable buyer/seller advisories.</p>
+            <span class="ppt-card-badge">6 ML Algorithms</span>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🛡️</span>
+            <h3>Production & Offline First</h3>
+            <p>100% self-contained architecture with zero external cloud dependencies. Bundled local SQLite audit logging, automated CSV retraining, and one-click execution.</p>
+            <span class="ppt-card-badge">100% Offline Capable</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: System Architecture & Modules -->
+      <section class="ppt-slide-card" id="slide-1" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">02 / SYSTEM ARCHITECTURE</span>
+          <h2 class="slide-title">Modular Multi-Tier Software Architecture</h2>
+          <p class="slide-subtitle">Clean separation of concerns across Client Presentation, API Gateway, Machine Learning Pipelines, and Persistence.</p>
+        </div>
+        <div class="ppt-grid-2">
+          <div class="ppt-card">
+            <span class="ppt-card-icon">💻</span>
+            <h3>Module 1: Client Layer (SPA / Templates)</h3>
+            <p>Built with React 18, TypeScript, and semantic responsive styling. Handles dynamic model selection, auto age derivation, real-time variance calculations, decision popups, and JSON/PDF exports.</p>
+            <span class="ppt-card-badge">React + TypeScript / HTML5</span>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">⚙️</span>
+            <h3>Module 2: API Gateway (FastAPI)</h3>
+            <p>High-performance asynchronous REST backend. Performs strict schema validation via Pydantic models, handles CORS, and exposes <code>/api/predict</code>, <code>/api/options</code>, and <code>/admin/*</code> routes.</p>
+            <span class="ppt-card-badge">FastAPI + Uvicorn</span>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🧠</span>
+            <h3>Module 3: Scikit-learn & XGBoost Engine</h3>
+            <p>Encapsulated ColumnTransformer preprocessing (median imputer + standard scaler + one-hot encoder) serialised with Joblib for zero data leakage between training and inference.</p>
+            <span class="ppt-card-badge">Joblib Pipeline Artifacts</span>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🗄️</span>
+            <h3>Module 4: Storage & Audit Logs</h3>
+            <p>Local SQLite database with SQLAlchemy ORM capturing all prediction requests and assessment outcomes without requiring external servers or credentials.</p>
+            <span class="ppt-card-badge">SQLite + SQLAlchemy</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Frontend ↔ Backend Connection -->
+      <section class="ppt-slide-card" id="slide-2" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">03 / INTEGRATION & DATA CONTRACT</span>
+          <h2 class="slide-title">How Frontend & Backend Connect in Real-Time</h2>
+          <p class="slide-subtitle">Step-by-step lifecycle of an inference request from user interaction to decision advisory.</p>
+        </div>
+        <div class="flow-diagram">
+          <div class="flow-node">
+            <div class="node-icon">📝</div>
+            <div class="node-title">1. User Input</div>
+            <div class="node-desc">Brand, Model, Year, km, Fuel, Trans</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node">
+            <div class="node-icon">🌐</div>
+            <div class="node-title">2. HTTP POST</div>
+            <div class="node-desc">/api/predict (JSON Payload)</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node">
+            <div class="node-icon">🛡️</div>
+            <div class="node-title">3. Pydantic Guard</div>
+            <div class="node-desc">Validates Types & Brand Model hierarchy</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node">
+            <div class="node-icon">⚡</div>
+            <div class="node-title">4. ML Transform</div>
+            <div class="node-desc">Pipeline Preprocessor + XGBoost</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node">
+            <div class="node-icon">📊</div>
+            <div class="node-title">5. Market Advisory</div>
+            <div class="node-desc">Fair Value, ±MAE Band, Buyer/Seller Tips</div>
+          </div>
+        </div>
+        <div class="ppt-card" style="margin-top: 20px;">
+          <h3>Data Contract Schema</h3>
+          <p style="font-family: monospace; font-size: 13px; color: #38bdf8;">
+            POST /api/predict ➔ { Brand, model, Year, Age, kmDriven_num, Transmission, Owner, FuelType, asking_price }<br>
+            RESPONSE ➔ { estimated_value, estimated_range: { low, high }, difference, difference_percent, assessment, recommendation, buyer_action, seller_action }
+          </p>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Machine Learning Implementation -->
+      <section class="ppt-slide-card" id="slide-3" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">04 / MACHINE LEARNING PIPELINE</span>
+          <h2 class="slide-title">6 Algorithms Benchmarked & Evaluated</h2>
+          <p class="slide-subtitle">Rigorous 80/20 train-test split evaluating Root Mean Squared Error (RMSE), Mean Absolute Error (MAE), and R² Score.</p>
+        </div>
+        <table class="ppt-table">
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Type</th>
+              <th>RMSE (₹)</th>
+              <th>MAE (₹)</th>
+              <th>R² Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="champion-row">
+              <td><b>XGBoost Regressor</b></td>
+              <td>Gradient Boosted Trees</td>
+              <td>₹582,112</td>
+              <td>₹213,098</td>
+              <td>0.8736</td>
+              <td>⭐ Production Champion</td>
+            </tr>
+            <tr>
+              <td>Random Forest Regressor</td>
+              <td>Bagged Ensembles (300 trees)</td>
+              <td>₹652,066</td>
+              <td>₹199,858</td>
+              <td>0.8414</td>
+              <td>Runner-up Candidate</td>
+            </tr>
+            <tr>
+              <td>Linear Regression</td>
+              <td>OLS Baseline</td>
+              <td>₹776,145</td>
+              <td>₹336,124</td>
+              <td>0.7753</td>
+              <td>Parametric Baseline</td>
+            </tr>
+            <tr>
+              <td>Lasso Regression</td>
+              <td>L1 Regularized (alpha=50)</td>
+              <td>₹778,619</td>
+              <td>₹335,944</td>
+              <td>0.7738</td>
+              <td>Feature-sparse Baseline</td>
+            </tr>
+            <tr>
+              <td>Ridge Regression</td>
+              <td>L2 Regularized (alpha=1.0)</td>
+              <td>₹779,603</td>
+              <td>₹336,617</td>
+              <td>0.7733</td>
+              <td>Collinearity-dampened</td>
+            </tr>
+            <tr>
+              <td>LightGBM Regressor</td>
+              <td>Leaf-wise Tree Growth</td>
+              <td>₹959,456</td>
+              <td>₹326,110</td>
+              <td>0.6566</td>
+              <td>Speed-optimized Candidate</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 14px; color: var(--text-muted); font-size: 13px;">
+          <b>Production Retraining Rule:</b> Following model tournament evaluation, the winning algorithm (XGBoost) is refit on 100% of the dataset to maximize real-world precision.
+        </p>
+      </section>
+
+      <!-- SLIDE 5: How Prediction & Decision Logic Works -->
+      <section class="ppt-slide-card" id="slide-4" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">05 / MATHEMATICAL FORMULATION</span>
+          <h2 class="slide-title">Prediction Calculation & Decision Engine</h2>
+          <p class="slide-subtitle">Translating raw regression outputs into practical negotiation strategies for buyers and sellers.</p>
+        </div>
+        <div class="ppt-grid-3">
+          <div class="ppt-card">
+            <span class="ppt-card-icon">📐</span>
+            <h3>1. Fair Value & Error Band</h3>
+            <p>The model infers fair market value <code>Ŷ</code>. The error band is defined as <code>[max(0, Ŷ - MAE), Ŷ + MAE]</code>, providing an honest confidence band reflecting dataset dispersion.</p>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">⚖️</span>
+            <h3>2. Asking Price Divergence</h3>
+            <p>Calculates variance: <code>Δ = Asking Price - Ŷ</code>.<br>Percentage difference: <code>|Δ| / Ŷ × 100%</code>.<br>Divergences within 5% are classified as <b>Fair Market Price</b>.</p>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🤝</span>
+            <h3>3. Dual Guidance Strategy</h3>
+            <p><b>If Above (>5%):</b> Buyer is cautioned to negotiate closer to <code>Ŷ</code>. Seller is advised to lower price.<br><b>If Below (<-5%):</b> Buyer alert for high deal value. Seller notified of potential underpricing.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Admin Lifecycle & Safety Gate -->
+      <section class="ppt-slide-card" id="slide-5" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">06 / MLOPS & RETRAINING</span>
+          <h2 class="slide-title">Admin Management & Production Deployment Gate</h2>
+          <p class="slide-subtitle">Ensures continuous model improvement without risking regressions in production accuracy.</p>
+        </div>
+        <div class="ppt-grid-2">
+          <div class="ppt-card">
+            <span class="ppt-card-icon">📂</span>
+            <h3>Batch Data Ingestion & Hygiene</h3>
+            <p>Admins upload batch CSVs at <code>/admin</code>. The system enforces required schema columns (Brand, Model, Year, Age, kmDriven, Transmission, Owner, FuelType, AskPrice), parses mixed currency and mileage strings, and removes duplicate listings.</p>
+          </div>
+          <div class="ppt-card">
+            <span class="ppt-card-icon">🔒</span>
+            <h3>The Automated Safety Gate</h3>
+            <p>When retraining is triggered, candidate models are stored in <code>models/registry/v{N}</code>. Activation endpoint <code>/admin/deploy/{v}</code> strictly evaluates: <code>Candidate RMSE &lt; Production RMSE</code>. If the candidate does not beat the champion, it is rejected!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Live Interactive Simulator -->
+      <section class="ppt-slide-card" id="slide-6" style="display:none;">
+        <div class="slide-header">
+          <span class="slide-tag">07 / LIVE HANDS-ON DEMO</span>
+          <h2 class="slide-title">Interactive Pipeline Flow Simulator</h2>
+          <p class="slide-subtitle">Trigger a live simulated inference request and watch the packet travel across every internal module.</p>
+        </div>
+
+        <div class="simulator-box">
+          <div class="sim-controls">
+            <select id="simBrand" class="sim-select">
+              <option value="Toyota">Toyota</option>
+              <option value="Maruti">Maruti</option>
+              <option value="Hyundai">Hyundai</option>
+              <option value="BMW">BMW</option>
+            </select>
+            <select id="simModel" class="sim-select">
+              <option value="Innova Crysta">Innova Crysta</option>
+              <option value="Swift">Swift</option>
+              <option value="Creta">Creta</option>
+              <option value="3 Series">3 Series</option>
+            </select>
+            <input type="number" id="simYear" class="sim-input" value="2020" placeholder="Year" style="width: 100px;">
+            <input type="number" id="simKm" class="sim-input" value="45000" placeholder="Km" style="width: 120px;">
+            <input type="number" id="simAsk" class="sim-input" value="2200000" placeholder="Asking Price" style="width: 140px;">
+            <button type="button" id="triggerSimBtn" class="ppt-btn primary">⚡ Trace Pipeline Flow</button>
+          </div>
+
+          <div class="flow-diagram" style="margin-top: 24px;">
+            <div class="flow-node" id="simNode1">
+              <div class="node-icon">📥</div>
+              <div class="node-title">1. Client Request</div>
+              <div class="node-desc">Payload Prepared</div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" id="simNode2">
+              <div class="node-icon">🛡️</div>
+              <div class="node-title">2. API Schema</div>
+              <div class="node-desc">Pydantic Cleaned</div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" id="simNode3">
+              <div class="node-icon">⚙️</div>
+              <div class="node-title">3. Preprocessor</div>
+              <div class="node-desc">OneHot + Imputer</div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" id="simNode4">
+              <div class="node-icon">🌲</div>
+              <div class="node-title">4. XGBoost Core</div>
+              <div class="node-desc">Inference Executed</div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" id="simNode5">
+              <div class="node-icon">🎯</div>
+              <div class="node-title">5. Market Decision</div>
+              <div class="node-desc">Band & Advisory</div>
+            </div>
+          </div>
+
+          <div class="sim-result-box" id="simOutput">
+            Ready. Click "Trace Pipeline Flow" above to simulate an end-to-end inference execution.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Bar Pagination -->
+    <footer class="ppt-bottombar">
+      <div class="slide-dots" id="slideDots"></div>
+      <div class="slide-number" id="slideCounter">Slide 1 of 7</div>
+    </footer>
+  </div>
+
+  <script>
+    const TOTAL_SLIDES = 7;
+    let currentSlide = 0;
+    let autoPlayTimer = null;
+
+    const slides = Array.from({ length: TOTAL_SLIDES }, (_, i) => document.getElementById(`slide-${i}`));
+    const dotsContainer = document.getElementById('slideDots');
+    const counter = document.getElementById('slideCounter');
+
+    // Create pagination dots
+    for (let i = 0; i < TOTAL_SLIDES; i++) {
+      const dot = document.createElement('div');
+      dot.className = `slide-dot ${i === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    function goToSlide(index) {
+      if (index < 0) index = TOTAL_SLIDES - 1;
+      if (index >= TOTAL_SLIDES) index = 0;
+
+      slides[currentSlide].style.display = 'none';
+      slides[currentSlide].classList.remove('active-slide');
+
+      currentSlide = index;
+
+      slides[currentSlide].style.display = 'block';
+      slides[currentSlide].classList.add('active-slide');
+
+      // Update dots
+      document.querySelectorAll('.slide-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === currentSlide);
+      });
+
+      counter.textContent = `Slide ${currentSlide + 1} of ${TOTAL_SLIDES}`;
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => goToSlide(currentSlide + 1));
+    document.getElementById('prevBtn').addEventListener('click', () => goToSlide(currentSlide - 1));
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToSlide(currentSlide - 1);
+      }
+    });
+
+    // Auto Play Toggle
+    const autoPlayBtn = document.getElementById('autoPlayBtn');
+    autoPlayBtn.addEventListener('click', () => {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        autoPlayBtn.textContent = '▶ Auto Play';
+        autoPlayBtn.classList.remove('primary');
+      } else {
+        autoPlayTimer = setInterval(() => goToSlide(currentSlide + 1), 5000);
+        autoPlayBtn.textContent = '⏸ Pause Auto';
+        autoPlayBtn.classList.add('primary');
+      }
+    });
+
+    // Fullscreen Toggle
+    document.getElementById('fsBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Interactive Demo Simulation
+    document.getElementById('triggerSimBtn').addEventListener('click', () => {
+      const brand = document.getElementById('simBrand').value;
+      const model = document.getElementById('simModel').value;
+      const year = parseInt(document.getElementById('simYear').value, 10) || 2020;
+      const km = parseInt(document.getElementById('simKm').value, 10) || 45000;
+      const ask = parseFloat(document.getElementById('simAsk').value) || 2200000;
+      const age = Math.max(0, new Date().getFullYear() - year);
+
+      const nodes = [1, 2, 3, 4, 5].map(n => document.getElementById(`simNode${n}`));
+      const out = document.getElementById('simOutput');
+
+      nodes.forEach(n => n.classList.remove('active-pulse'));
+      out.textContent = "Initiating Request Pipeline...";
+
+      // Step-by-step pulse animation
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step > 0) nodes[step - 1].classList.remove('active-pulse');
+        if (step < nodes.length) {
+          nodes[step].classList.add('active-pulse');
+          if (step === 0) out.textContent = `[Step 1 Client] Serialized JSON: { Brand: "${brand}", model: "${model}", Year: ${year}, km: ${km} }`;
+          if (step === 1) out.textContent = `[Step 2 Gateway] FastAPI Pydantic schema validated. Age computed as ${age} years.`;
+          if (step === 2) out.textContent = `[Step 3 ColumnTransformer] Transformed into 1hot vector + standard scaled numerical vector.`;
+          if (step === 3) out.textContent = `[Step 4 Model] XGBoost pipeline calculated point prediction...`;
+          if (step === 4) {
+            // Rough baseline estimate
+            let base = 1200000;
+            if (brand === "Toyota") base = 2100000;
+            else if (brand === "BMW") base = 4200000;
+            else if (brand === "Maruti") base = 650000;
+            
+            const estimated = Math.round(base * Math.pow(0.92, age));
+            const diff = ask - estimated;
+            const diffPct = ((Math.abs(diff) / estimated) * 100).toFixed(1);
+            const verdict = diffPct <= 5 ? "Fair Market Price" : (diff > 0 ? "Above Market Value" : "Below Market Value");
+
+            out.innerHTML = `✅ <b>Simulation Complete:</b> Estimated Fair Value: <b>₹${estimated.toLocaleString('en-IN')}</b> | Range: <b>₹${(estimated - 150000).toLocaleString('en-IN')} - ₹${(estimated + 150000).toLocaleString('en-IN')}</b><br>` +
+              `Asking Price: <b>₹${ask.toLocaleString('en-IN')}</b> (Diff: <b>₹${diff.toLocaleString('en-IN')}</b>, ${diffPct}%) | Assessment: <b style="color:${diff>0?'#f87171':'#34d399'}">${verdict}</b>`;
+          }
+          step++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>

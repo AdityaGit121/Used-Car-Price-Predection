@@ -47,6 +47,11 @@
     <div class="range-label">Estimated market range</div>
     <div class="range"><span id="low"></span><div class="line"><i></i></div><span id="high"></span></div>
     <p class="small">The range represents a model-based market-error band; it is an estimate, not a guaranteed transaction price.</p>
+    
+    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" id="downloadBtn" class="btn-download">📥 Download Report</button>
+      <button type="button" onclick="window.print()" class="btn-download btn-secondary">🖨️ Print Sheet</button>
+    </div>
   </div>
   <div class="assessment">
     <div class="eyebrow">MARKET ASSESSMENT</div>
@@ -85,29 +90,58 @@
 </main>
 <script>
 let options={};
+let currentResult = null;
+let currentInput = null;
 const $=id=>document.getElementById(id);
 const money=n=>'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:0});
+
 async function init(){
-  options=await fetch('/api/options').then(r=>r.json());
-  $('Brand').innerHTML='<option value="">Select brand</option>'+Object.keys(options.brand_models).map(x=>`<option>${x}</option>`).join('');
-  fill('Transmission',options.transmissions); fill('Owner',options.owners); fill('FuelType',options.fuel_types);
+  try {
+    options=await fetch('/api/options').then(r=>r.json());
+    $('Brand').innerHTML='<option value="">Select brand</option>'+Object.keys(options.brand_models).map(x=>`<option value="${x}">${x}</option>`).join('');
+    fill('Transmission',options.transmissions); 
+    fill('Owner',options.owners); 
+    fill('FuelType',options.fuel_types);
+  } catch(e) {
+    console.error('Failed to load options:', e);
+  }
 }
-function fill(id,arr){$(id).innerHTML='<option value="">Select</option>'+arr.map(x=>`<option>${x}</option>`).join('');}
+
+function fill(id,arr){$(id).innerHTML='<option value="">Select</option>'+arr.map(x=>`<option value="${x}">${x}</option>`).join('');}
+
 $('Brand').addEventListener('change',()=>{
   const b=$('Brand').value; const ms=options.brand_models[b]||[];
-  $('model').innerHTML='<option value="">Select model</option>'+ms.map(x=>`<option>${x}</option>`).join('');
+  $('model').innerHTML='<option value="">Select model</option>'+ms.map(x=>`<option value="${x}">${x}</option>`).join('');
 });
-$('Year').addEventListener('input',()=>{let y=+$('Year').value;if(y>=1950&&y<=2035)$('Age').value=Math.max(0,new Date().getFullYear()-y)});
+
+$('Year').addEventListener('input',()=>{
+  let y=+$('Year').value;
+  if(y>=1950&&y<=2035)$('Age').value=Math.max(0,new Date().getFullYear()-y);
+});
+
 $('form').addEventListener('submit',async e=>{
  e.preventDefault(); $('error').textContent='';
- const payload={Brand:$('Brand').value,model:$('model').value,Year:+$('Year').value,Age:+$('Age').value,
- kmDriven_num:+$('kmDriven_num').value,FuelType:$('FuelType').value,Transmission:$('Transmission').value,Owner:$('Owner').value,
- asking_price:$('asking_price').value?+$('asking_price').value:null};
+ const payload={
+   Brand:$('Brand').value,
+   model:$('model').value,
+   Year:+$('Year').value,
+   Age:+$('Age').value,
+   kmDriven_num:+$('kmDriven_num').value,
+   FuelType:$('FuelType').value,
+   Transmission:$('Transmission').value,
+   Owner:$('Owner').value,
+   asking_price:$('asking_price').value?+$('asking_price').value:null
+ };
+ currentInput = payload;
  try{
   const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const d=await r.json(); if(!r.ok)throw Error(d.detail||'Prediction failed');
-  $('result').classList.remove('hidden'); $('price').textContent=money(d.estimated_value);
-  $('low').textContent=money(d.estimated_range.low); $('high').textContent=money(d.estimated_range.high);
+  const d=await r.json(); 
+  if(!r.ok) throw Error(d.detail||'Prediction failed');
+  currentResult = d;
+  $('result').classList.remove('hidden'); 
+  $('price').textContent=money(d.estimated_value);
+  $('low').textContent=money(d.estimated_range.low); 
+  $('high').textContent=money(d.estimated_range.high);
   $('assessment').textContent=d.assessment||'Add asking price to compare';
   $('comparison').innerHTML=d.asking_price!=null
     ? `<div>Seller asking price <b>${money(d.asking_price)}</b></div><div>Difference from estimate <b>${money(d.difference)}</b> (${d.difference_percent}%)</div>`
@@ -134,6 +168,22 @@ $('form').addEventListener('submit',async e=>{
   $('result').scrollIntoView({behavior:'smooth',block:'start'});
  }catch(err){$('error').textContent=err.message}
 });
+
+$('downloadBtn').addEventListener('click', () => {
+  if (!currentResult) return;
+  const report = {
+    title: "CarValue Used Car Market Valuation Report",
+    generated_at: new Date().toISOString(),
+    vehicle: currentInput,
+    valuation: currentResult
+  };
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `carvalue-report-${currentInput ? currentInput.Brand + '-' + currentInput.model : 'valuation'}.json`;
+  a.click();
+});
+
 $('closeModal').addEventListener('click',()=>$('decisionModal').classList.add('hidden'));
 $('modalOk').addEventListener('click',()=>$('decisionModal').classList.add('hidden'));
 $('decisionModal').addEventListener('click',e=>{if(e.target.id==='decisionModal')$('decisionModal').classList.add('hidden')});

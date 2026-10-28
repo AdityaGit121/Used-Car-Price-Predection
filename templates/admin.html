@@ -1,21 +1,140 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CarValue Admin</title><link rel="stylesheet" href="/static/style.css"></head>
-<body><main class="wrap">
-<section class="hero"><div><div class="eyebrow">ADMINISTRATION</div><h1>Model & Dataset Management</h1><p>Upload data, validate it, retrain candidates, compare metrics, and activate only a better production model.</p></div></section>
-<section class="panel">
-<h2>Dataset management</h2>
-<div class="admin-actions">
-<input id="file" type="file" accept=".csv"><button onclick="upload()">Upload & Validate</button>
-<button onclick="validate()">Validate Latest Upload</button><button onclick="retrain()">Retrain All Models</button>
-</div><pre id="out">Ready.</pre>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CarValue Admin — Model & Dataset Management</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🚗 <span>CarValue Admin</span></div>
+  <div class="tagline"><a href="/" style="color:#71808c;text-decoration:none">← Back to Valuation Tool</a></div>
+</header>
+<main class="wrap">
+<section class="hero">
+  <div>
+    <div class="eyebrow">ADMINISTRATION</div>
+    <h1>Model & Dataset Management</h1>
+    <p>Upload data batches, validate schema, retrain candidate models across 6 algorithms, compare metrics, and activate only improved production models.</p>
+  </div>
 </section>
-<section class="panel"><h2>Model comparison</h2><button onclick="compare()">Refresh Comparison</button><div id="table"></div></section>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>Dataset management</h2>
+    <p>Upload a new batch of used-car listings in CSV format.</p>
+  </div>
+  <div class="admin-actions">
+    <input id="file" type="file" accept=".csv">
+    <button onclick="upload()">Upload & Validate</button>
+    <button onclick="validate()">Validate Latest Upload</button>
+    <button onclick="retrain()">Retrain All Models</button>
+  </div>
+  <pre id="out">Ready.</pre>
+</section>
+
+<section class="panel">
+  <div class="section-head" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2>Model comparison</h2>
+      <p>RMSE, MAE, and R² scores evaluated on an 80/20 test split.</p>
+    </div>
+    <button onclick="compare()">Refresh Comparison</button>
+  </div>
+  <div id="table">Loading comparison...</div>
+</section>
+
+<footer>For administrator use only. Model changes directly affect live prediction outputs.</footer>
 </main>
 <script>
-const out=x=>document.getElementById('out').textContent=typeof x==='string'?x:JSON.stringify(x,null,2);
-async function call(url,opt={}){let r=await fetch(url,opt);let d=await r.json();if(!r.ok)throw Error(d.detail||JSON.stringify(d));return d}
-async function upload(){try{let f=document.getElementById('file').files[0];if(!f)return out('Choose a CSV first.');let fd=new FormData();fd.append('file',f);out(await call('/admin/upload',{method:'POST',body:fd}))}catch(e){out(e.message)}}
-async function validate(){try{out(await call('/admin/validate',{method:'POST'}))}catch(e){out(e.message)}}
-async function retrain(){try{out('Training Linear, Ridge, Lasso, Random Forest, XGBoost and LightGBM...');out(await call('/admin/retrain',{method:'POST'}));await compare()}catch(e){out(e.message)}}
-async function compare(){try{let d=await call('/admin/comparison');let rows=d.results.sort((a,b)=>a.RMSE-b.RMSE).map((r,i)=>`<tr><td>${i+1}</td><td>${r.algorithm}</td><td>${r.RMSE.toLocaleString('en-IN',{maximumFractionDigits:0})}</td><td>${r.MAE.toLocaleString('en-IN',{maximumFractionDigits:0})}</td><td>${r.R2.toFixed(4)}</td></tr>`).join('');document.getElementById('table').innerHTML=`<table><tr><th>#</th><th>Algorithm</th><th>RMSE</th><th>MAE</th><th>R²</th></tr>${rows}</table><p><b>Best candidate:</b> ${d.best.algorithm}</p>`}catch(e){out(e.message)}}
-</script></body></html>
+const out = x => document.getElementById('out').textContent = typeof x === 'string' ? x : JSON.stringify(x, null, 2);
+
+async function call(url, opt = {}) {
+  let r = await fetch(url, opt);
+  let d = await r.json();
+  if (!r.ok) throw Error(d.detail || JSON.stringify(d));
+  return d;
+}
+
+async function upload() {
+  try {
+    let f = document.getElementById('file').files[0];
+    if (!f) return out('Choose a CSV file first.');
+    let fd = new FormData();
+    fd.append('file', f);
+    out('Uploading and validating dataset...');
+    out(await call('/admin/upload', { method: 'POST', body: fd }));
+  } catch(e) {
+    out(e.message);
+  }
+}
+
+async function validate() {
+  try {
+    out('Validating latest uploaded file...');
+    out(await call('/admin/validate', { method: 'POST' }));
+  } catch(e) {
+    out(e.message);
+  }
+}
+
+async function retrain() {
+  try {
+    out('Retraining Linear Regression, Ridge, Lasso, Random Forest, XGBoost and LightGBM...');
+    let res = await call('/admin/retrain', { method: 'POST' });
+    out(res);
+    await compare();
+  } catch(e) {
+    out(e.message);
+  }
+}
+
+async function deploy(version) {
+  try {
+    out(`Deploying version ${version}...`);
+    let res = await call(`/admin/deploy/${version}`, { method: 'POST' });
+    out(res);
+    await compare();
+  } catch(e) {
+    out(e.message);
+  }
+}
+
+async function compare() {
+  try {
+    let d = await call('/admin/comparison');
+    let rows = d.results
+      .sort((a, b) => a.RMSE - b.RMSE)
+      .map((r, i) => {
+        let isBest = r.algorithm === d.best.algorithm;
+        return `<tr style="${isBest ? 'background:#f0fdf4;font-weight:bold' : ''}">
+          <td>${i + 1}</td>
+          <td>${r.algorithm} ${isBest ? '⭐ (Best)' : ''}</td>
+          <td>₹${Math.round(r.RMSE).toLocaleString('en-IN')}</td>
+          <td>₹${Math.round(r.MAE).toLocaleString('en-IN')}</td>
+          <td>${Number(r.R2).toFixed(4)}</td>
+        </tr>`;
+      }).join('');
+
+    let deployBtn = d.version 
+      ? `<button style="margin-top:12px;background:#027a48" onclick="deploy('${d.version}')">Deploy ${d.version} to Production</button>`
+      : '';
+
+    document.getElementById('table').innerHTML = `
+      <table>
+        <tr><th>#</th><th>Algorithm</th><th>RMSE</th><th>MAE</th><th>R²</th></tr>
+        ${rows}
+      </table>
+      <p style="margin-top:14px"><b>Best candidate:</b> ${d.best.algorithm} (Version: ${d.version || 'production'})</p>
+      ${deployBtn}
+    `;
+  } catch(e) {
+    document.getElementById('table').textContent = 'No comparisons available yet. Click "Retrain All Models".';
+  }
+}
+
+compare();
+</script>
+</body>
+</html>

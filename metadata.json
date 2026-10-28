@@ -1,0 +1,8 @@
+{
+  "name": "CarValue — Used Car Market Value",
+  "description": "Transparent used-car valuation calculator and market assessment platform with ML model comparison and admin tools.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
