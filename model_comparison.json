@@ -1,0 +1,54 @@
+{
+  "dataset_rows": 9582,
+  "results": [
+    {
+      "key": "linear_regression",
+      "algorithm": "Linear Regression",
+      "RMSE": 776144.5054681825,
+      "MAE": 336123.6817694927,
+      "R2": 0.7752698883175495
+    },
+    {
+      "key": "ridge_regression",
+      "algorithm": "Ridge Regression",
+      "RMSE": 779602.9889846253,
+      "MAE": 336616.5474790226,
+      "R2": 0.7732626408749282
+    },
+    {
+      "key": "lasso_regression",
+      "algorithm": "Lasso Regression",
+      "RMSE": 778618.6022840721,
+      "MAE": 335943.8715515823,
+      "R2": 0.7738348714358437
+    },
+    {
+      "key": "random_forest",
+      "algorithm": "Random Forest",
+      "RMSE": 652066.2247941633,
+      "MAE": 199858.3818663431,
+      "R2": 0.8413794307838369
+    },
+    {
+      "key": "xgboost",
+      "algorithm": "XGBoost",
+      "RMSE": 582112.1856547078,
+      "MAE": 213098.28518732477,
+      "R2": 0.8735876589104478
+    },
+    {
+      "key": "lightgbm",
+      "algorithm": "LightGBM",
+      "RMSE": 959455.9453092457,
+      "MAE": 326110.06473054376,
+      "R2": 0.6565795368661937
+    }
+  ],
+  "best": {
+    "key": "xgboost",
+    "algorithm": "XGBoost",
+    "RMSE": 582112.1856547078,
+    "MAE": 213098.28518732477,
+    "R2": 0.8735876589104478
+  }
+}

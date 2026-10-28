@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Local environment variables / secrets
+.env
+
+# Large datasets or model weights (if applicable)
+*.csv
+*.pkl
+*.model
+*.gbtree
+

@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CarValue Admin</title><link rel="stylesheet" href="/static/style.css"></head>
+<body><main class="wrap">
+<section class="hero"><div><div class="eyebrow">ADMINISTRATION</div><h1>Model & Dataset Management</h1><p>Upload data, validate it, retrain candidates, compare metrics, and activate only a better production model.</p></div></section>
+<section class="panel">
+<h2>Dataset management</h2>
+<div class="admin-actions">
+<input id="file" type="file" accept=".csv"><button onclick="upload()">Upload & Validate</button>
+<button onclick="validate()">Validate Latest Upload</button><button onclick="retrain()">Retrain All Models</button>
+</div><pre id="out">Ready.</pre>
+</section>
+<section class="panel"><h2>Model comparison</h2><button onclick="compare()">Refresh Comparison</button><div id="table"></div></section>
+</main>
+<script>
+const out=x=>document.getElementById('out').textContent=typeof x==='string'?x:JSON.stringify(x,null,2);
+async function call(url,opt={}){let r=await fetch(url,opt);let d=await r.json();if(!r.ok)throw Error(d.detail||JSON.stringify(d));return d}
+async function upload(){try{let f=document.getElementById('file').files[0];if(!f)return out('Choose a CSV first.');let fd=new FormData();fd.append('file',f);out(await call('/admin/upload',{method:'POST',body:fd}))}catch(e){out(e.message)}}
+async function validate(){try{out(await call('/admin/validate',{method:'POST'}))}catch(e){out(e.message)}}
+async function retrain(){try{out('Training Linear, Ridge, Lasso, Random Forest, XGBoost and LightGBM...');out(await call('/admin/retrain',{method:'POST'}));await compare()}catch(e){out(e.message)}}
+async function compare(){try{let d=await call('/admin/comparison');let rows=d.results.sort((a,b)=>a.RMSE-b.RMSE).map((r,i)=>`<tr><td>${i+1}</td><td>${r.algorithm}</td><td>${r.RMSE.toLocaleString('en-IN',{maximumFractionDigits:0})}</td><td>${r.MAE.toLocaleString('en-IN',{maximumFractionDigits:0})}</td><td>${r.R2.toFixed(4)}</td></tr>`).join('');document.getElementById('table').innerHTML=`<table><tr><th>#</th><th>Algorithm</th><th>RMSE</th><th>MAE</th><th>R²</th></tr>${rows}</table><p><b>Best candidate:</b> ${d.best.algorithm}</p>`}catch(e){out(e.message)}}
+</script></body></html>

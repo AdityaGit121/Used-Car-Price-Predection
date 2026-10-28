@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CarValue — Used Car Market Value</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🚗 <span>CarValue</span></div>
+  <div class="tagline">Transparent used-car valuation</div>
+</header>
+<main class="wrap">
+<section class="hero">
+  <div>
+    <div class="eyebrow">USED-CAR MARKET VALUE</div>
+    <h1>Know the fair value before you buy or sell.</h1>
+    <p>Enter the vehicle details to estimate a data-driven market value from historical used-car listings.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><h2>Vehicle details</h2><p>Use the details shown in the listing or vehicle documents.</p></div></div>
+  <form id="form">
+    <div class="fields">
+      <label>Brand<select id="Brand" required></select></label>
+      <label>Model<select id="model" required></select></label>
+      <label>Manufacturing Year<input id="Year" type="number" min="1950" max="2035" required></label>
+      <label>Car Age<input id="Age" type="number" min="0" max="80" required></label>
+      <label>Kilometres Driven<input id="kmDriven_num" type="number" min="0" step="1" placeholder="e.g. 45000" required></label>
+      <label>Fuel Type<select id="FuelType" required></select></label>
+      <label>Transmission<select id="Transmission" required></select></label>
+      <label>Number of Owners<select id="Owner" required></select></label>
+      <label class="wide">Current Seller Asking Price <span class="muted">(optional — enables market comparison)</span>
+        <input id="asking_price" type="number" min="0" step="1000" placeholder="e.g. 620000">
+      </label>
+    </div>
+    <button type="submit">Check Fair Value</button>
+    <div id="error"></div>
+  </form>
+</section>
+
+<section id="result" class="result hidden">
+  <div class="result-main">
+    <div class="eyebrow">ESTIMATED USED-CAR MARKET VALUE</div>
+    <div id="price" class="price">₹ —</div>
+    <div class="range-label">Estimated market range</div>
+    <div class="range"><span id="low"></span><div class="line"><i></i></div><span id="high"></span></div>
+    <p class="small">The range represents a model-based market-error band; it is an estimate, not a guaranteed transaction price.</p>
+  </div>
+  <div class="assessment">
+    <div class="eyebrow">MARKET ASSESSMENT</div>
+    <div id="assessment" class="assessment-title">—</div>
+    <div id="comparison" class="comparison"></div>
+    <div id="recommendation" class="recommendation hidden"></div>
+  </div>
+  <div class="why">
+    <h3>Why this valuation?</h3>
+    <div class="chips">
+      <span>✓ Brand & model</span><span>✓ Vehicle age</span><span>✓ Kilometres driven</span>
+      <span>✓ Fuel type</span><span>✓ Transmission</span><span>✓ Ownership history</span>
+    </div>
+    <p>These are the vehicle attributes used by the valuation model. The estimate is based on historical listings in the supplied dataset.</p>
+  </div>
+</section>
+
+<div id="decisionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="closeModal" aria-label="Close">×</button>
+    <div id="modalBadge" class="modal-badge">MARKET ASSESSMENT</div>
+    <h2 id="decisionTitle">—</h2>
+    <p id="modalSummary"></p>
+    <div class="modal-stat"><span>Estimated value</span><b id="modalEstimate"></b></div>
+    <div class="modal-stat"><span>Seller asking price</span><b id="modalAsking"></b></div>
+    <div class="modal-stat"><span>Difference</span><b id="modalDifference"></b></div>
+    <div class="modal-actions">
+      <div><strong>Buyer:</strong> <span id="modalBuyer"></span></div>
+      <div><strong>Seller:</strong> <span id="modalSeller"></span></div>
+    </div>
+    <button type="button" class="modal-ok" id="modalOk">Got it</button>
+  </div>
+</div>
+
+<footer>For transparency and decision support. Not a guarantee of resale or purchase price.</footer>
+</main>
+<script>
+let options={};
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:0});
+async function init(){
+  options=await fetch('/api/options').then(r=>r.json());
+  $('Brand').innerHTML='<option value="">Select brand</option>'+Object.keys(options.brand_models).map(x=>`<option>${x}</option>`).join('');
+  fill('Transmission',options.transmissions); fill('Owner',options.owners); fill('FuelType',options.fuel_types);
+}
+function fill(id,arr){$(id).innerHTML='<option value="">Select</option>'+arr.map(x=>`<option>${x}</option>`).join('');}
+$('Brand').addEventListener('change',()=>{
+  const b=$('Brand').value; const ms=options.brand_models[b]||[];
+  $('model').innerHTML='<option value="">Select model</option>'+ms.map(x=>`<option>${x}</option>`).join('');
+});
+$('Year').addEventListener('input',()=>{let y=+$('Year').value;if(y>=1950&&y<=2035)$('Age').value=Math.max(0,new Date().getFullYear()-y)});
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault(); $('error').textContent='';
+ const payload={Brand:$('Brand').value,model:$('model').value,Year:+$('Year').value,Age:+$('Age').value,
+ kmDriven_num:+$('kmDriven_num').value,FuelType:$('FuelType').value,Transmission:$('Transmission').value,Owner:$('Owner').value,
+ asking_price:$('asking_price').value?+$('asking_price').value:null};
+ try{
+  const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const d=await r.json(); if(!r.ok)throw Error(d.detail||'Prediction failed');
+  $('result').classList.remove('hidden'); $('price').textContent=money(d.estimated_value);
+  $('low').textContent=money(d.estimated_range.low); $('high').textContent=money(d.estimated_range.high);
+  $('assessment').textContent=d.assessment||'Add asking price to compare';
+  $('comparison').innerHTML=d.asking_price!=null
+    ? `<div>Seller asking price <b>${money(d.asking_price)}</b></div><div>Difference from estimate <b>${money(d.difference)}</b> (${d.difference_percent}%)</div>`
+    : '<div>Add a seller asking price above to see the market comparison.</div>';
+
+  const rec=$('recommendation');
+  if(d.recommendation){
+    rec.classList.remove('hidden');
+    rec.innerHTML=`<strong>Recommendation</strong><p>${d.recommendation}</p>`;
+  } else rec.classList.add('hidden');
+
+  if(d.asking_price!=null){
+    const modal=$('decisionModal');
+    $('decisionTitle').textContent=d.assessment;
+    $('modalSummary').textContent=d.recommendation;
+    $('modalEstimate').textContent=money(d.estimated_value);
+    $('modalAsking').textContent=money(d.asking_price);
+    $('modalDifference').textContent=`${money(d.difference)} (${d.difference_percent}% ${d.difference>0?'above':'below'} estimate)`;
+    $('modalBuyer').textContent=d.buyer_action||'—';
+    $('modalSeller').textContent=d.seller_action||'—';
+    $('modalBadge').textContent=d.difference>0 ? '⚠️ ABOVE MARKET VALUE' : d.difference<0 ? '✓ BELOW MARKET VALUE' : '— FAIR MARKET PRICE';
+    modal.classList.remove('hidden');
+  }
+  $('result').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(err){$('error').textContent=err.message}
+});
+$('closeModal').addEventListener('click',()=>$('decisionModal').classList.add('hidden'));
+$('modalOk').addEventListener('click',()=>$('decisionModal').classList.add('hidden'));
+$('decisionModal').addEventListener('click',e=>{if(e.target.id==='decisionModal')$('decisionModal').classList.add('hidden')});
+init();
+</script>
+</body></html>
